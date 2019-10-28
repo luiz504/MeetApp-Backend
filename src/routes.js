@@ -18,10 +18,12 @@ routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
 
 routes.use(authentication);
+
 routes.put('/users', UserController.update);
 
 routes.post('/meetups', MeetupController.store);
 routes.put('/meetups/:meetupId', MeetupController.update);
+routes.delete('/meetups/:meetupId', MeetupController.delete);
 
 routes.get('/organizer', OrganizerController.index);
 
