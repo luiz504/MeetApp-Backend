@@ -23,7 +23,8 @@ class User extends Model {
   }
 
   // static associate(models) {
-  //   this.hasMany(models.Meetup);
+  //   this.hasMany(models.User);
+  //   this.hasMany(models.Subscription);
   // }
 
   checkPassword(password) {
