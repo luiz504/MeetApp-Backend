@@ -22,6 +22,7 @@ module.exports = {
     'prettier/prettier':'error',
     'class-methods-use-this': 'off',
     'no-param-reassign': 'off',
-    'no-unused-vars': 'off'
+    'no-unused-vars': 'off',
+    'camelcase': 'off'
   },
 };

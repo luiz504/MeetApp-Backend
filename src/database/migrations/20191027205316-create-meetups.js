@@ -47,8 +47,7 @@ module.exports = {
       },
     });
   },
-
   down: queryInterface => {
-    return queryInterface.dropTable('meetups');
+    return queryInterface.dropTable('users');
   },
 };
