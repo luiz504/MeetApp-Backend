@@ -1,7 +1,9 @@
 import * as Yup from 'yup';
-import { parseISO, isBefore } from 'date-fns';
+import { parseISO, isBefore, startOfDay, endOfDay } from 'date-fns';
+import { Op } from 'sequelize';
 
 import Meetup from '../models/Meetup';
+import User from '../models/User';
 
 class MeetupController {
   async store(req, res) {
@@ -30,6 +32,49 @@ class MeetupController {
      * validation meetup interval
      *  */
     return res.json(meetup);
+  }
+
+  async index(req, res) {
+    const seachDate = parseISO(req.query.date);
+    const { page = 1 } = req.query;
+    const meetups = await Meetup.findAll({
+      where: {
+        date: {
+          [Op.between]: [startOfDay(seachDate), endOfDay(seachDate)],
+        },
+      },
+      order: ['date'],
+      limit: 10,
+      offset: (page - 1) * 10,
+      include: [
+        {
+          model: User,
+          attributes: ['name', 'email'],
+        },
+      ],
+    });
+    return res.json(meetups);
+    // const where = {};
+    // const page = req.query.page || 1;
+    // if (req.query.date) {
+    //   const searchDate = parseISO(req.query.date);
+    //   where.date = {
+    //     [Op.between]: [startOfDay(searchDate), endOfDay(searchDate)],
+    //   };
+    // }
+    // const meetups = await Meetup.findAll({
+    //   where,
+    //   include: [
+    //     {
+    //       model: User,
+    //       attributes: ['name', 'email'],
+    //     },
+    //   ],
+    //   order: ['date'],
+    //   limit: 10,
+    //   offset: 10 * page - 10,
+    // });
+    // return res.json(meetups);
   }
 
   async update(req, res) {

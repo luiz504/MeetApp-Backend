@@ -1,28 +1,31 @@
+import { Op } from 'sequelize';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
 import User from '../models/User';
+import Queue from '../../lib/Queue';
+import SubscriptionMail from '../jobs/SubscriptionMail';
 
 class SubscriptionController {
   async store(req, res) {
+    const user = await User.findByPk(req.userId);
     const meetup = await Meetup.findByPk(req.params.meetupId, {
       include: { model: User },
     });
-    // meetup exist
+
     if (!meetup) {
       return res.status(400).json({ error: 'Meetup does not exists' });
     }
 
-    // subscriber !== organiazer
     if (meetup.user_id === req.userId) {
       return res
         .status(401)
-        .json({ error: 'You cannot subscribe your own meetup' });
+        .json({ error: 'You cannot subscribe for your own meetup' });
     }
-    // meetup past
+
     if (meetup.past) {
       return res.status(400).json({ error: 'Meetup alredy past' });
     }
-    // user alredy sub at same time
+
     const dateCheck = await Subscription.findOne({
       where: { user_id: req.userId },
       include: [
@@ -32,6 +35,7 @@ class SubscriptionController {
         },
       ],
     });
+
     if (dateCheck) {
       return res
         .status(401)
@@ -43,7 +47,32 @@ class SubscriptionController {
       user_id: req.userId,
     });
 
+    await Queue.add(SubscriptionMail.key, {
+      meetup,
+      user,
+    });
+
     return res.json(subscribe);
+  }
+
+  async index(req, res) {
+    const meetups = await Subscription.findAll({
+      where: { user_id: req.userId },
+      include: [
+        {
+          model: Meetup,
+          where: {
+            date: {
+              [Op.gt]: new Date(),
+            },
+          },
+          required: true,
+        },
+      ],
+      order: [[Meetup, 'date']],
+    });
+
+    return res.json(meetups);
   }
 }
 
