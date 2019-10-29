@@ -1,3 +1,4 @@
+import { Op, Sequelize } from 'sequelize';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
 import User from '../models/User';
@@ -52,6 +53,25 @@ class SubscriptionController {
     });
 
     return res.json(subscribe);
+  }
+
+  async index(req, res) {
+    const meetups = await Subscription.findAll({
+      where: { user_id: req.userId },
+      include: [
+        {
+          model: Meetup,
+          where: {
+            date: {
+              [Op.gt]: new Date(),
+            },
+          },
+          required: true,
+        },
+      ],
+      order: [[Meetup, 'date']],
+    });
+    return res.json(meetups);
   }
 }
 
