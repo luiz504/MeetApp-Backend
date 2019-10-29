@@ -290,7 +290,7 @@ Table of contents
 - Redis Config: /src/config/redis.js
 ---
 
-## Errors handles after deploy manager
+## Errors handler after deploy manager
 - [x] [Sentry](https://sentry.io)
 - Config: /src/config/sentry
 - File: /src/app.js
